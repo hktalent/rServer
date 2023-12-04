@@ -33,6 +33,7 @@ jobs:
         id: new-additions
         run: |
           npm install
+          ls -lah node_modules
           node .github/genCode.js
       - name: Commit files
         run: |
