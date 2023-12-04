@@ -1,0 +1,46 @@
+name: 🥳 New Poc List
+
+on:
+  push:
+    branches:
+      - main
+      # cron表达式是一种用来表示时间和日期的字符串，它有六个字段，分别是：
+      # 秒（0-59）
+      # 分钟（0-59）
+      # 小时（0-23）
+      # 日期（1-31）
+      # 月份（1-12）
+      # 星期（0-6，0表示星期日）
+  schedule:
+      - cron:  '0 * * * *' # 每小时执行一次
+  
+  workflow_dispatch:
+
+jobs:
+  templates:
+    runs-on: ubuntu-latest
+    if: github.repository == 'hktalent/rServer'
+    steps:
+      - uses: actions/checkout@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install Dependences
+        run: sudo apt install -yy nodejs npm 
+
+      - name: Generate new PoCs Info list
+        id: new-additions
+        run: |
+          npm install
+          node .github/genCode.js
+      - name: Commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit --allow-empty -m "Auto update md PoCs lists [$(date)] :robot:" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
